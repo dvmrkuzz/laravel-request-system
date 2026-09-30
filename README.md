@@ -60,6 +60,47 @@ A web-based request management system built with the Laravel framework. The syst
 
 An `.sql` export file is not required, because the migration files included in this repository rebuild the complete database structure.
 
+## Request Data Model (Laboratory 2)
+
+The `requests` table stores each submitted request.
+
+| Field | Type | Constraint | Purpose |
+|---|---|---|---|
+| id | BIGINT UNSIGNED | Primary key, auto-increment | Unique request number |
+| requester_name | VARCHAR(100) | Required | Person submitting the request |
+| requester_email | VARCHAR(255) | Required | Contact address |
+| item_name | VARCHAR(150) | Required | Requested item or service |
+| quantity | INT UNSIGNED | Required | Requested quantity |
+| purpose | TEXT | Required | Reason for the request |
+| status | VARCHAR(20) | Default `pending` | Request state |
+| created_at | TIMESTAMP | Auto | Creation time |
+| updated_at | TIMESTAMP | Auto | Last update time |
+
+### Creating the migration
+
+    php artisan make:migration create_requests_table
+
+### Verifying the table
+
+    php artisan migrate
+    php artisan migrate:status
+
+Then open phpMyAdmin, select `laravel_request_system_db`, and inspect the
+`requests` table structure. Confirm the default status by inserting a row
+without a `status` value and checking that it is stored as `pending`.
+
+### User Stories
+
+- **Requester:** As a requester, I want to submit a request containing my name,
+  email, the item I need, the quantity, and my reason for needing it, so that
+  the office has a complete record of what I am asking for.
+- **Staff Reviewer:** As a staff reviewer, I want every incoming request to
+  arrive with a clear status and a stated purpose, so that I can tell which
+  requests still need a decision.
+- **Record Keeper:** As a record keeper, I want each request to carry a unique
+  identifying number and automatic timestamps, so that I can trace any request
+  back to when it was filed and last changed.
+  
 ## Running the Project
 
     php artisan serve
