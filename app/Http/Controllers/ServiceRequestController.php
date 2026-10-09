@@ -59,9 +59,7 @@ class ServiceRequestController extends Controller
 
     public function show(ServiceRequest $serviceRequest)
     {
-        if (Gate::denies('view', $serviceRequest)) {
-            throw new NotFoundHttpException();
-        }
+        $this->authorizeViewOrFail($serviceRequest);
 
         return view('requests.show', compact('serviceRequest'));
     }
@@ -80,5 +78,19 @@ class ServiceRequestController extends Controller
         return redirect()
             ->route('requests.show', $serviceRequest)
             ->with('status', 'Status updated successfully.');
+    }
+
+    /**
+     * Deny access to a record the signed-in user may not view.
+     *
+     * The denial response is defined here in one place so that every method
+     * needing this rule returns the same 404, keeping the behaviour
+     * consistent with what the README documents.
+     */
+    private function authorizeViewOrFail(ServiceRequest $serviceRequest): void
+    {
+        if (Gate::denies('view', $serviceRequest)) {
+            throw new NotFoundHttpException();
+        }
     }
 }
