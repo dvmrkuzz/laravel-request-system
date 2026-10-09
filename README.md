@@ -116,3 +116,57 @@ Then open http://127.0.0.1:8000 in your browser.
 ## Repository
 
 https://github.com/dvmrkuzz/laravel-request-system
+
+## Access Control (Laboratory 3)
+
+### Ownership rules
+
+- All request routes require authentication. Guests are redirected to the login page.
+- Students see only requests where `user_id` matches their own account.
+- A record may be viewed by its owner or by an administrator.
+- Any authenticated student may create a request.
+- Only an administrator may update a request status.
+- Ownership is determined from `user_id`, never from `requester_name` or `requester_email`.
+
+### Denial response
+
+A student requesting another student's record receives **404 Not Found**, applied
+consistently. A 403 would confirm the record exists, which gives an attacker useful
+information while probing sequential IDs. A 404 reveals nothing. The status-update
+route returns 403 instead, because there the user may legitimately see the record and
+only the action is denied.
+
+### Routes
+
+| Verb | URI | Method | Who may use it |
+|---|---|---|---|
+| GET | /requests | index | Any signed-in user; results scoped by role |
+| GET | /requests/create | create | Students only |
+| POST | /requests | store | Students only |
+| GET | /requests/{id} | show | Owner or administrator |
+| PATCH | /requests/{id}/status | updateStatus | Administrator only |
+
+### File responsibilities
+
+| File or area | Maintainer |
+|---|---|
+| app/Policies/ServiceRequestPolicy.php | Mark Julius Bongalbal |
+| app/Http/Controllers/ServiceRequestController.php | Mark Julius Bongalbal |
+| routes/web.php | Mark Julius Bongalbal |
+| resources/views/requests/ | Mark Julius Bongalbal |
+| README.md | Shiela Mae Fungo |
+
+### Testing the access controls
+
+1. Run the migrations and seed the accounts:
+
+       php artisan migrate
+       php artisan db:seed --class=AccountSeeder
+
+2. Start the server with `php artisan serve`.
+3. Log out and open `/requests` — you should be redirected to login.
+4. Log in as Student A and confirm the list shows only their own records.
+5. Open another student's record ID directly — you should receive 404.
+6. Log in as the administrator and confirm all records are listed and a status
+   change is saved.
+7. Submit a quantity of 0 or a blank item name — the server rejects the input.
